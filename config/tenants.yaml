@@ -1,0 +1,5 @@
+# Flock tenant connectors. One entry per SaaS tenant managed by Flock.
+tenants:
+  kestrel-workspace:
+    connector: workspace
+    enabled: true
