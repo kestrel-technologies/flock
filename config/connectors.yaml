@@ -1,0 +1,9 @@
+# Flock connector defaults, one block per connector type. Tenants pick a type in tenants.yaml.
+# Credentials are never stored here: *_ref values are Strongbox references, resolved at runtime
+# from the files the Strongbox agent renders for flockd. {tenant} is replaced by the tenant name.
+connectors:
+  workspace:
+    base_url: https://directory.workspace.kestrel.example/v1
+    auth: bearer
+    token_ref: strongbox://entsec-identity/flock/workspace/{tenant}/api-token
+    requests_per_minute: 600
