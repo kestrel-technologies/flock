@@ -2,6 +2,14 @@
 # Credentials are never stored here: *_ref values are Strongbox references, resolved at runtime
 # from the files the Strongbox agent renders for flockd. {tenant} is replaced by the tenant name.
 connectors:
+  salesforce:
+    api_version: "45.0"
+    auth: jwt-bearer
+    jwt_audience: https://login.salesforce.com
+    client_id_ref: strongbox://entsec-identity/flock/salesforce/{tenant}/client-id
+    key_ref: strongbox://entsec-identity/flock/salesforce/{tenant}/jwt-key
+    default_profile: Standard User
+    requests_per_minute: 120
   workspace:
     base_url: https://directory.workspace.kestrel.example/v1
     auth: bearer

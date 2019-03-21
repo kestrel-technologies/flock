@@ -1,6 +1,7 @@
 package config
 
 import (
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -70,5 +71,19 @@ func TestRejectsUnknownConnectorAndSSOMode(t *testing.T) {
 		if _, err := ParseTenants([]byte(src)); err == nil {
 			t.Errorf("expected an error for %q", src)
 		}
+	}
+}
+
+func TestLoadConnectors(t *testing.T) {
+	cs, err := LoadConnectors(filepath.Join("..", "..", "config", "connectors.yaml"))
+	if err != nil {
+		t.Fatalf("LoadConnectors: %v", err)
+	}
+	sf, ok := cs[ConnectorSalesforce]
+	if !ok || sf.APIVersion == "" || !strings.HasPrefix(sf.KeyRef, "strongbox://") {
+		t.Errorf("salesforce defaults = %+v", sf)
+	}
+	if got := ExpandRef(sf.KeyRef, "alpha-prod"); strings.Contains(got, "{tenant}") || !strings.Contains(got, "alpha-prod") {
+		t.Errorf("ExpandRef = %s", got)
 	}
 }
