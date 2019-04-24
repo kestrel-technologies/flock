@@ -1,5 +1,10 @@
 # Flock tenant connectors. One entry per SaaS tenant managed by Flock.
 tenants:
+  kestrel-corp-prod:
+    connector: salesforce
+    enabled: true
+    login_url: https://kestrel-corp.my.salesforce.com
+    service_user: svc.flock@kestrel-corp.kestrel.example
   kestrel-workspace:
     connector: workspace
     enabled: true
