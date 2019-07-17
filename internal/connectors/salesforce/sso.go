@@ -2,13 +2,18 @@ package salesforce
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"kestrel.example/flock/internal/connectors"
 )
+
+// Single sign-on in a Salesforce tenant has two halves. The SAML configuration (issuer
+// https://sso.kestrel.example, Flock-issued metadata) is installed once by the tenant's admins when
+// the tenant is onboarded; see docs/salesforce-connector.md. Enforcement is what Flock does on every
+// reconcile: the profile permission "Is Single Sign-On Enabled" (PermissionsIsSsoEnabled) makes
+// users on that profile log in through the Kestrel identity provider.
 
 type profile struct {
 	ID         string `json:"Id"`
@@ -56,5 +61,32 @@ func (c *Connector) profileID(ctx context.Context, name string) (string, error) 
 	return id, nil
 }
 
-// EnforceSSO implements connectors.Connector. Profile enforcement lands with FLOCK-33.
-func (c *Connector) EnforceSSO(context.Context) error { return connectors.ErrNotSupported }
+// EnforceSSO turns on "Is Single Sign-On Enabled" for every internal-user profile of the org except
+// API-only profiles (service users such as svc.flock cannot complete a SAML login) and the profiles
+// listed in the tenant's sso_exempt_profiles (the break-glass profile named in the onboarding CHG).
+func (c *Connector) EnforceSSO(ctx context.Context) error {
+	ps, err := c.profiles(ctx)
+	if err != nil {
+		return err
+	}
+	exempt := map[string]bool{}
+	for _, n := range c.tenant.SSOExemptProfiles {
+		exempt[n] = true
+	}
+	var errs []error
+	changed := 0
+	for _, p := range ps {
+		if p.APIOnly || exempt[p.Name] || p.SSOEnabled {
+			continue
+		}
+		body := map[string]bool{"PermissionsIsSsoEnabled": true}
+		if err := c.do(ctx, http.MethodPatch, c.dataURL("/sobjects/Profile/"+p.ID), body, nil); err != nil {
+			errs = append(errs, fmt.Errorf("profile %s: %w", p.Name, err))
+			continue
+		}
+		changed++
+		c.log.Info("sso enforced on profile", "tenant", c.tenant.Name, "profile", p.Name)
+	}
+	c.log.Info("sso enforcement pass", "tenant", c.tenant.Name, "profiles", len(ps), "changed", changed)
+	return errors.Join(errs...)
+}
