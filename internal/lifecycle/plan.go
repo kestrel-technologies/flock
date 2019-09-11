@@ -15,6 +15,11 @@ func Plan(ev Event, enabled map[string]bool) ([]Action, error) {
 	switch ev.Type {
 	case Joiner:
 		out = planJoiner(ev, enabled)
+	case Mover:
+		if ev.Previous == nil {
+			return nil, fmt.Errorf("event %s: mover without previous record", ev.ID)
+		}
+		out = planMover(ev, enabled)
 	case Leaver:
 		out = planLeaver(ev, enabled)
 	default:
