@@ -1,0 +1,14 @@
+name: ci
+on:
+  pull_request: { branches: [develop, uat, main] }
+  push: { branches: [develop, uat, main] }
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-go@v1
+        with: { go-version: '1.13' }
+      - run: go vet ./...
+      - run: go build ./...
+      - run: go test ./...
