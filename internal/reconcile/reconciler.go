@@ -24,7 +24,8 @@ type DesiredFunc func(ctx context.Context, t config.Tenant) ([]connectors.Accoun
 // AccountFunc maps an HR record to the tenant's account for event-driven actions.
 type AccountFunc func(t config.Tenant, p lifecycle.Person) connectors.Account
 
-// Reconciler is the control loop. Tenants with enabled: false are skipped.
+// Reconciler is the control loop. Tenants with enabled: false are skipped on every pass and logged
+// as "tenant disabled: <name>"; no connector is built for them and their accounts are not touched.
 type Reconciler struct {
 	Tenants  *config.Tenants
 	Factory  Factory
@@ -58,12 +59,21 @@ func (r *Reconciler) connector(t config.Tenant) (connectors.Connector, error) {
 	return c, nil
 }
 
+func (r *Reconciler) logDisabled(t config.Tenant) {
+	attrs := []any{"tenant", t.Name, "connector", t.Connector}
+	if t.Note != "" {
+		attrs = append(attrs, "note", t.Note)
+	}
+	r.logger().Info("tenant disabled: "+t.Name, attrs...)
+}
+
 // RunOnce reconciles every enabled tenant once and returns one report per reconciled tenant.
 func (r *Reconciler) RunOnce(ctx context.Context) ([]connectors.Report, error) {
 	var reports []connectors.Report
 	var errs []error
 	for _, t := range r.Tenants.All() {
 		if !t.Enabled {
+			r.logDisabled(t)
 			continue
 		}
 		c, err := r.connector(t)
