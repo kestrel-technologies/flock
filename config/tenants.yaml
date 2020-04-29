@@ -1,4 +1,5 @@
 # Flock tenant connectors. One entry per SaaS tenant managed by Flock.
+# Enabling a tenant requires a CHG ticket; see docs/tenants.md.
 tenants:
   kestrel-corp-prod:
     connector: salesforce
