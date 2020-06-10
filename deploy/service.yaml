@@ -1,0 +1,44 @@
+# flockd on the Kestrel Cloud Platform serverless runtime (Knative Serving API).
+# Applied by Flightpath on promotion to main; the image tag is VERSION. Project ids are KCP ids.
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: flockd
+  namespace: entsec-identity
+  labels:
+    app: flock
+    team: flock-team
+    kestrel.example/project: kcp-entsec-identity-prod
+    kestrel.example/data-sensitivity: restricted
+  annotations:
+    kestrel.example/owner: entsec-identity-platforms
+    kestrel.example/perch-queue: FLOCK
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        kestrel.example/strongbox-role: flockd-prod
+        kestrel.example/strongbox-render: /var/run/strongbox
+    spec:
+      serviceAccountName: flockd
+      timeoutSeconds: 300
+      containers:
+        - image: registry.kestrel.example/kcp-entsec-identity-prod/flockd
+          args: ["-interval=15m", "-event-interval=1m"]
+          env:
+            - name: FLOCK_HR_FEED_URL
+              value: https://people.kestrel.example/feed
+            - name: FLOCK_HR_FEED_TOKEN_REF
+              value: strongbox://entsec-identity/flock/hr-feed/token
+            - name: STRONGBOX_ROOT
+              value: /var/run/strongbox
+          resources:
+            limits: { cpu: "1", memory: 512Mi }
+          volumeMounts:
+            - name: strongbox
+              mountPath: /var/run/strongbox
+              readOnly: true
+      volumes:
+        - name: strongbox
+          emptyDir: { medium: Memory }
