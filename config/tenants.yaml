@@ -7,6 +7,12 @@ tenants:
     login_url: https://kestrel-corp.my.salesforce.com
     service_user: svc.flock@kestrel-corp.kestrel.example
     enforce_sso_profiles: all
+  kestrel-cloud-sales-prod:
+    connector: salesforce
+    enabled: true
+    login_url: https://kestrel-cloud-sales.my.salesforce.com
+    service_user: svc.flock@kestrel-cloud-sales.kestrel.example
+    enforce_sso_profiles: all
   kestrel-workspace:
     connector: workspace
     enabled: true
