@@ -15,3 +15,5 @@ connectors:
     auth: bearer
     token_ref: strongbox://entsec-identity/flock/workspace/{tenant}/api-token
     requests_per_minute: 600
+  slack:
+    status: stub   # parse-only; see internal/connectors/slack

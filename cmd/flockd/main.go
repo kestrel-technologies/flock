@@ -15,6 +15,7 @@ import (
 	"kestrel.example/flock/internal/config"
 	"kestrel.example/flock/internal/connectors"
 	"kestrel.example/flock/internal/connectors/salesforce"
+	"kestrel.example/flock/internal/connectors/slack"
 	"kestrel.example/flock/internal/connectors/workspace"
 	"kestrel.example/flock/internal/hrfeed"
 	"kestrel.example/flock/internal/lifecycle"
@@ -125,6 +126,8 @@ func factory(ctx context.Context, conns config.Connectors, vault secrets.Resolve
 				return nil, err
 			}
 			return workspace.New(t, workspace.Options{BaseURL: d.BaseURL, Token: string(token), Logger: log})
+		case config.ConnectorSlack:
+			return slack.New(t)
 		}
 		return nil, fmt.Errorf("tenant %s: no connector %q", t.Name, t.Connector)
 	}
