@@ -87,3 +87,33 @@ func TestLoadConnectors(t *testing.T) {
 		t.Errorf("ExpandRef = %s", got)
 	}
 }
+
+// TestRepositoryTenants pins the enabled flag of every tenant in config/tenants.yaml. Changing a flag
+// needs a CHG ticket (docs/tenants.md); update this table in the same CL so the reviewer sees both.
+func TestRepositoryTenants(t *testing.T) {
+	ts, err := LoadTenants(filepath.Join("..", "..", "config", "tenants.yaml"))
+	if err != nil {
+		t.Fatalf("config/tenants.yaml: %v", err)
+	}
+	want := map[string]bool{
+		"kestrel-corp-prod":        true,
+		"kestrel-cloud-sales-prod": true,
+		"vantage-uat":              true,
+		"vantage-prod":             true,
+		"kestrel-workspace":        true,
+	}
+	all := ts.All()
+	if len(all) != len(want) {
+		t.Errorf("config/tenants.yaml has %d tenants, table has %d", len(all), len(want))
+	}
+	for _, tn := range all {
+		enabled, ok := want[tn.Name]
+		if !ok {
+			t.Errorf("tenant %s is not in the table", tn.Name)
+			continue
+		}
+		if tn.Enabled != enabled {
+			t.Errorf("tenant %s: enabled = %v, table says %v", tn.Name, tn.Enabled, enabled)
+		}
+	}
+}

@@ -13,6 +13,18 @@ tenants:
     login_url: https://kestrel-cloud-sales.my.salesforce.com
     service_user: svc.flock@kestrel-cloud-sales.kestrel.example
     enforce_sso_profiles: all
+  vantage-uat:
+    connector: salesforce
+    enabled: true
+    login_url: https://kestrelvantage-uat.my.salesforce.com
+    service_user: svc.flock@vantage-uat.kestrel.example
+    enforce_sso_profiles: all
+  vantage-prod:
+    connector: salesforce
+    enabled: true
+    login_url: https://kestrelvantage-prod.my.salesforce.com
+    service_user: svc.flock@vantage-prod.kestrel.example
+    enforce_sso_profiles: all
   kestrel-workspace:
     connector: workspace
     enabled: true

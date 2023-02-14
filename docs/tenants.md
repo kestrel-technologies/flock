@@ -37,8 +37,10 @@ Changing `enabled` on a production tenant is a change to who can sign in to that
 **CHG ticket** in Perch, approved by the tenant's owner and by Identity Platforms.
 
 1. Put the CHG number in the CL title, e.g. `chore(tenants): enable example-prod [CHG-1234]`.
-2. When disabling for a planned window, add a `note` with the reason and the CHG so the next person
+2. Update the table in `TestRepositoryTenants` (`internal/config/config_test.go`) in the same CL;
+   the test pins every tenant's `enabled` flag so a flip cannot slip through unnoticed.
+3. When disabling for a planned window, add a `note` with the reason and the CHG so the next person
    knows what to undo.
-3. The change takes effect when the CL is promoted to `main` and deployed (see
+4. The change takes effect when the CL is promoted to `main` and deployed (see
    [`deploy/README.md`](../deploy/README.md)). Merging to `develop` or `uat` changes nothing in any
    tenant.
