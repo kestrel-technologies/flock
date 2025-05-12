@@ -98,8 +98,8 @@ func TestRepositoryTenants(t *testing.T) {
 	want := map[string]bool{
 		"kestrel-corp-prod":        true,
 		"kestrel-cloud-sales-prod": true,
-		"vantage-uat":              true,
-		"vantage-prod":             true,
+		"vantage-uat":              false,
+		"vantage-prod":             false,
 		"kestrel-workspace":        true,
 	}
 	all := ts.All()

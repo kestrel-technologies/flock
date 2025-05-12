@@ -15,16 +15,11 @@ tenants:
     enforce_sso_profiles: all
   vantage-uat:
     connector: salesforce
-    enabled: true
+    enabled: false
     login_url: https://kestrelvantage-uat.my.salesforce.com
     service_user: svc.flock@vantage-uat.kestrel.example
     enforce_sso_profiles: all
-  vantage-prod:
-    connector: salesforce
-    enabled: true
-    login_url: https://kestrelvantage-prod.my.salesforce.com
-    service_user: svc.flock@vantage-prod.kestrel.example
-    enforce_sso_profiles: all
+  vantage-prod: { connector: salesforce, enabled: false, note: "TODO re-enable after Q2-2025 user migration (CHG-2291)" }
   kestrel-workspace:
     connector: workspace
     enabled: true
