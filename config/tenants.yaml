@@ -15,7 +15,7 @@ tenants:
     enforce_sso_profiles: all
   vantage-uat:
     connector: salesforce
-    enabled: false
+    enabled: true
     login_url: https://kestrelvantage-uat.my.salesforce.com
     service_user: svc.flock@vantage-uat.kestrel.example
     enforce_sso_profiles: all
