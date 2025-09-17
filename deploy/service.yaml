@@ -17,7 +17,9 @@ spec:
   template:
     metadata:
       annotations:
+        # One reconciler at a time: flockd has no leader election.
         autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "1"
         kestrel.example/strongbox-role: flockd-prod
         kestrel.example/strongbox-render: /var/run/strongbox
     spec:
