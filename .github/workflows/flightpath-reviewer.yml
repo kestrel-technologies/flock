@@ -1,0 +1,23 @@
+# Flightpath Reviewer (Flightpath §6, KES §5). Posts one verdict comment per CL and sets the
+# `flightpath/reviewer` commit status. Identical in every code repository.
+name: flightpath/reviewer
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [develop, uat, main]
+permissions: { contents: read, pull-requests: write, statuses: write }
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with: { python-version: '3.12' }
+      - run: pip install anthropic==1.12.1 requests==2.32.3
+      - run: python3 .github/scripts/flightpath_reviewer.py
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KES_URL: https://raw.githubusercontent.com/${{ github.repository_owner }}/kestrel-standards/main/standards/KES-3.md
