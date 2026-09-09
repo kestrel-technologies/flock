@@ -31,16 +31,17 @@ func main() {
 	connectorsPath := flag.String("connectors", "config/connectors.yaml", "connector defaults")
 	interval := flag.Duration("interval", 15*time.Minute, "full reconcile interval")
 	eventInterval := flag.Duration("event-interval", time.Minute, "HR event polling interval")
+	once := flag.Bool("once", false, "run a single reconcile pass and exit (no event polling)")
 	flag.Parse()
 
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil)).With("service", "flockd")
-	if err := run(log, *tenantsPath, *connectorsPath, *interval, *eventInterval); err != nil {
+	if err := run(log, *tenantsPath, *connectorsPath, *interval, *eventInterval, *once); err != nil {
 		log.Error("flockd stopped", "err", err)
 		os.Exit(1)
 	}
 }
 
-func run(log *slog.Logger, tenantsPath, connectorsPath string, interval, eventInterval time.Duration) error {
+func run(log *slog.Logger, tenantsPath, connectorsPath string, interval, eventInterval time.Duration, once bool) error {
 	tenants, err := config.LoadTenants(tenantsPath)
 	if err != nil {
 		return err
@@ -69,6 +70,15 @@ func run(log *slog.Logger, tenantsPath, connectorsPath string, interval, eventIn
 	}
 	for _, t := range tenants.All() {
 		log.Info("tenant loaded", "tenant", t.Name, "connector", t.Connector, "enabled", t.Enabled)
+	}
+
+	if once {
+		reports, err := r.RunOnce(ctx)
+		for _, rep := range reports {
+			log.Info("tenant reconciled", "tenant", rep.Tenant, "created", rep.Created, "updated", rep.Updated,
+				"deactivated", rep.Deactivated, "unchanged", rep.Unchanged)
+		}
+		return err
 	}
 
 	go pollEvents(ctx, log, feed, r, eventInterval)
