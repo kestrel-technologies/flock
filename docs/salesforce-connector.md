@@ -44,3 +44,26 @@ itself into an org.
    in Strongbox at `.../<tenant>/jwt-key` and never leaves it. Nothing goes into this repository.
 6. **Tenant entry.** Add the tenant to `config/tenants.yaml` with `enabled: false`, then follow
    [tenants.md](tenants.md#enabling-or-disabling-a-tenant) to enable it under a CHG ticket.
+
+## Checking a tenant before and after enabling it
+
+Run one reconcile pass from a workstation against a sandbox tenant (e.g. `vantage-uat`) with a
+tenants file that lists only that tenant, enabled, and a Strongbox render directory you are allowed
+to read:
+
+```sh
+STRONGBOX_ROOT=$HOME/.strongbox/render go run ./cmd/flockd -once -tenants /tmp/one-tenant.yaml
+```
+
+The JSON log shows `sso enforced on profile` for every profile it changed and one `reconciled` line
+with counts. Then confirm in the org itself, for example with the Salesforce CLI:
+
+```sh
+sf data query --target-org <alias> \
+  -q "SELECT Name, PermissionsIsSsoEnabled FROM Profile WHERE UserType = 'Standard' ORDER BY Name"
+sf data query --target-org <alias> \
+  -q "SELECT Username, IsActive FROM User WHERE Username LIKE 'svc.flock@%'"
+```
+
+A tenant that is disabled in `config/tenants.yaml` on `main` is not reconciled in production, whatever
+the other branches say.
