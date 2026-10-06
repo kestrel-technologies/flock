@@ -44,3 +44,19 @@ Changing `enabled` on a production tenant is a change to who can sign in to that
 4. The change takes effect when the CL is promoted to `main` and deployed (see
    [`deploy/README.md`](../deploy/README.md)). Merging to `develop` or `uat` changes nothing in any
    tenant.
+
+## What "disabled" means
+
+On every pass the reconciler logs `tenant disabled: <name>` (with the note, if any) and moves on.
+For a disabled tenant flockd:
+
+- builds no connector and makes no API call to the tenant;
+- sends no joiner, mover or leaver actions, so leavers are **not** deactivated there by Flock; the
+  tenant's own admins must do it until the tenant is enabled again;
+- does not enforce single sign-on on the tenant's profiles.
+
+To see when and why a tenant changed state, read the file's history:
+
+```sh
+git log -p --follow config/tenants.yaml
+```
