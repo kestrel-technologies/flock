@@ -99,7 +99,7 @@ func TestRepositoryTenants(t *testing.T) {
 		"kestrel-corp-prod":        true,
 		"kestrel-cloud-sales-prod": true,
 		"vantage-uat":              true,
-		"vantage-prod":             false,
+		"vantage-prod":             true,
 		"kestrel-workspace":        true,
 	}
 	all := ts.All()
